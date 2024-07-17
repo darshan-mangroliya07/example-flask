@@ -1,26 +1,35 @@
 from flask import Flask
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from playwright.sync_api import sync_playwright
+
+def run(playwright):
+    browser = playwright.chromium.launch(headless=False)
+    context = browser.new_context()
+    page = context.new_page()
+
+    # Open a website
+    page.goto('http://google.com')
+
+
+    # Get the title of the page
+    title = page.title()
+    print(title)
+
+    # Close the browser
+    browser.close()
+
+with sync_playwright() as playwright:
+    run(playwright)
+
+
 
 app = Flask(__name__)
 
-options=webdriver.EdgeOptions()
-options.add_argument("--headless")
-options.add_argument("--disable-gpu")
-options.add_argument("--disable-extensions")
-options.add_argument("--no-sandbox")
-
-driver=webdriver.Edge(options=options)
 
 
 @app.route('/')
 def hello_world():
-
-    driver.get("https://www.google.com")
-    return driver.title
+    run()
+    return "Hello"
 
 
 if __name__ == "__main__":
